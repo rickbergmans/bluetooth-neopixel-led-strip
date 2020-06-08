@@ -36,6 +36,7 @@ bool LilacOld = LOW;
 bool RainbowOld = LOW;
 bool rgbOld = LOW;
 bool rainbowLongOld = LOW;
+bool strobeEffectOld = LOW;
 int  showType = 0;
 int  loops = 1;
 
@@ -71,6 +72,7 @@ void loop() {
   bool Rainbow = LOW;
   bool rainbowLong = LOW;
   bool rgb = LOW;
+  bool strobeEffect = LOW;
   bool end;
   
    if (BT.available())
@@ -186,20 +188,30 @@ if(a=='l')
     }else{
           rainbowLong = LOW;  
     }
+// ===========================================================================================
 
+     if(a=='c')
+    {
+      strobeEffect = HIGH;
+          BT.println("STROBE");      
+          
+    }else{
+          strobeEffect = LOW;  
+    }
+    
 // ===========================================================================================
 
      if(a=='1')
     {
           BT.println("LOW");      
-          showType = 10;                            // Low brightness
+          showType = 11;                            // Low brightness
           startShow(showType);
     }
 
      if(a=='2')
     {
           BT.println("MIDDLE");      
-          showType = 11;                            // Middle brightness
+          showType = 12;                            // Middle brightness
           startShow(showType);
     }
 
@@ -207,7 +219,7 @@ if(a=='l')
      if(a=='3')
     {
           BT.println("HIGH");      
-          showType = 12;                            //  High brightness
+          showType = 13;                            //  High brightness
           startShow(showType);
     }
 
@@ -351,6 +363,17 @@ showType = 8;                            // Rainbow animation Type 8
 
 // ===========================================================================================
 
+    if (strobeEffect == LOW && strobeEffectOld == HIGH) {
+    delay(20);
+
+    if (strobeEffect == LOW) {
+      showType = 10;                            // Rainbow animation Type 10
+      startShow(showType);
+    }
+  }
+  
+// ===========================================================================================
+
       if (rgb == LOW && rgbOld == HIGH) {
     delay(20);
 
@@ -375,6 +398,7 @@ showType = 8;                            // Rainbow animation Type 8
   offOld = off;
   RainbowOld = Rainbow;
   rainbowLongOld = rainbowLong;
+  strobeEffectOld = strobeEffect;
   rgbOld = rgb;
 
 }
@@ -415,14 +439,17 @@ void startShow(int i) {
             
     case 9: rainbowCycleLong(loops);
             break;
-            
-    case 10:strip.setBrightness(20);  
+
+    case 10: Strobe(0xdf, 0xff, 0xfe, 10, 50, 1000);
+             break;
+    
+    case 11:strip.setBrightness(20);  
             break;
 
-    case 11:strip.setBrightness(90);  
+    case 12:strip.setBrightness(90);  
             break;
 
-    case 12:strip.setBrightness(255);  
+    case 13:strip.setBrightness(255);  
             break;
   }
 }
@@ -486,6 +513,43 @@ void theaterChase(uint32_t c, uint8_t wait) {
       }
     }
   }
+}
+
+// ANIMATION #4 - STROBE EFFECT
+
+void Strobe(byte red, byte green, byte blue, int StrobeCount, int FlashDelay, int EndPause){
+  for(int j = 0; j < StrobeCount; j++) {
+    setAll(red,green,blue);
+    strip.show();
+    delay(FlashDelay);
+    setAll(0,0,0);
+    strip.show();
+    delay(FlashDelay);
+  }
+ 
+ delay(EndPause);
+}
+
+// Set a LED color (not yet visible)
+void setPixel(int Pixel, byte red, byte green, byte blue) {
+ #ifdef ADAFRUIT_NEOPIXEL_H 
+   // NeoPixel
+   strip.setPixelColor(Pixel, strip.Color(red, green, blue));
+ #endif
+ #ifndef ADAFRUIT_NEOPIXEL_H 
+   // FastLED
+   leds[Pixel].r = red;
+   leds[Pixel].g = green;
+   leds[Pixel].b = blue;
+ #endif
+}
+
+// Set all LEDs to a given color and apply it (visible)
+void setAll(byte red, byte green, byte blue) {
+  for(int i = 0; i < PIXEL_COUNT; i++ ) {
+    setPixel(i, red, green, blue); 
+  }
+  strip.show();
 }
 
 //  COLOR WHEEL
